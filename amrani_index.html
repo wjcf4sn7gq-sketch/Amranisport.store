@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>amrani.sport.network</title>
+
+<style>
+:root {
+  --blue:#4da6ff;
+  --green:#00ff66;
+  --bg:black;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--blue);
+  font-family:monospace;
+}
+.hidden { display:none; }
+.login {
+  min-height:100vh;
+  padding:24px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.editor {
+  color:var(--green);
+  font-size:20px;
+  margin-bottom:20px;
+}
+.editor::after {
+  content:"_";
+  animation:blink 1s infinite;
+}
+@keyframes blink { 50%{opacity:0} }
+.title {
+  text-align:center;
+  letter-spacing:5px;
+  margin-bottom:25px;
+  text-shadow:0 0 10px var(--blue);
+}
+.bar {
+  display:flex;
+  border:2px solid var(--blue);
+  box-shadow:0 0 15px var(--blue);
+}
+.bar input {
+  flex:1;
+  padding:16px;
+  background:black;
+  border:none;
+  color:var(--blue);
+  font-size:16px;
+}
+.bar button {
+  width:120px;
+  background:var(--blue);
+  border:none;
+  font-weight:bold;
+}
+.sys {
+  margin-top:20px;
+  font-size:12px;
+  opacity:.6;
+}
+.menu {
+  position:fixed;
+  top:12px;
+  right:16px;
+  font-size:26px;
+}
+.menu-items {
+  display:none;
+  background:black;
+  border:1px solid var(--blue);
+}
+.menu:hover .menu-items { display:block; }
+.menu-items div { padding:12px; }
+.grid {
+  padding:80px 14px 30px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+.card {
+  border:1px solid var(--blue);
+  padding:10px;
+  font-size:14px;
+}
+.card img {
+  width:100%;
+  height:160px;
+  object-fit:cover;
+}
+.whatsapp {
+  margin-top:8px;
+  width:100%;
+  padding:8px;
+  border:1px solid #25D366;
+  background:black;
+  color:#25D366;
+}
+@media(min-width:768px){
+  .grid { grid-template-columns:repeat(4,1fr); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="login" class="login">
+  <div class="editor">amrani.sport.network</div>
+  <div class="title">— ENTER PASSWORD —</div>
+  <div class="bar">
+    <input id="sitePass" type="password" placeholder="ACCESS CODE">
+    <button onclick="enterSite()">VALIDATE</button>
+  </div>
+  <div class="sys">
+    ATTEMPT 01/03..<br>
+    DECRYPTING AM.SPORT GATEWAY..<br>
+    TROUBLE? CONTACT SUPPORT.
+  </div>
+</div>
+
+<div id="site" class="hidden">
+  <div class="menu">
+    ☰
+    <div class="menu-items">
+      <div onclick="filterCat('all')">All</div>
+      <div onclick="filterCat('sneakers')">Sneakers</div>
+      <div onclick="filterCat('tracksuits')">Tracksuits</div>
+      <div onclick="openAdmin()">Admin</div>
+    </div>
+  </div>
+  <div id="products" class="grid"></div>
+</div>
+
+<div id="admin" class="login hidden">
+  <div class="editor">ADMIN ACCESS</div>
+  <div class="bar">
+    <input id="adminPass" type="password" placeholder="ADMIN CODE">
+    <button onclick="adminLogin()">ENTER</button>
+  </div>
+</div>
+
+<script>
+const SITE_HASH = "d28a5b5c6b3f888e02e2f1cc9168c6290685c3670e4c3771be601aab0cd39c24";
+const ADMIN_HASH = "f14c28cd9c779062a0c575ce9797c6481fcd50468e3df5acf0062dd2b169f30e";
+const WA = "https://wa.me/message/6RPCEPP43ACUJ1";
+
+async function hash(t){
+ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+ return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+async function enterSite(){
+ if(await hash(sitePass.value)===SITE_HASH){
+  login.classList.add("hidden");
+  site.classList.remove("hidden");
+  load();
+ } else alert("DENIED");
+}
+
+async function adminLogin(){
+ if(await hash(adminPass.value)===ADMIN_HASH){
+  admin.classList.add("hidden");
+  site.classList.remove("hidden");
+  alert("ADMIN MODE");
+ } else alert("DENIED");
+}
+
+let items = JSON.parse(localStorage.getItem("items")) || [
+ {name:"Demo Sneakers",price:"120€",desc:"Premium quality",cat:"sneakers",img:"https://via.placeholder.com/400"}
+];
+
+function load(cat="all"){
+ products.innerHTML="";
+ items.filter(p=>cat==="all"||p.cat===cat).forEach(p=>{
+  const m = encodeURIComponent("Hello amrani.sport.network\nProduct: "+p.name+"\nPrice: "+p.price);
+  products.innerHTML += `
+   <div class="card">
+    <img src="${p.img}">
+    <b>${p.name}</b><br>
+    ${p.price}<br>
+    ${p.desc}
+    <button class="whatsapp" onclick="window.open('${WA}?text=${m}')">WhatsApp</button>
+   </div>`;
+ });
+}
+
+function filterCat(c){ load(c); }
+function openAdmin(){ site.classList.add("hidden"); admin.classList.remove("hidden"); }
+</script>
+
+</body>
+</html>
